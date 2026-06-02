@@ -225,6 +225,21 @@ The frontend WebSocket service uses:
 ws://localhost:8000/ws/dashboard
 ```
 
+### Agent links mode
+
+The dashboard also exposes an agent-link view backed by:
+
+```text
+/api/dashboard/agent-network
+```
+
+This mode is designed to:
+
+- show every persona and control node in one place
+- show outgoing links for each agent
+- highlight the current agent and active paths for the current workflow state
+- refresh when `StateTransition` events arrive over the dashboard socket
+
 ### Pause and resume examples
 
 ```json

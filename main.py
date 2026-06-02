@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
+from backend.core.agent_graph import build_agent_graph
 from backend.core.orchestrator import Orchestrator
 from backend.core.state_machine import HermesState
 from backend.services.llm_gateway import LocalOllamaProvider
@@ -26,6 +27,11 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Hermes Orchestrator", lifespan=lifespan)
+
+
+@app.get("/api/dashboard/agent-network")
+async def agent_network() -> dict[str, object]:
+    return build_agent_graph(orchestrator.state_machine.current_state)
 
 
 @app.websocket("/ws/dashboard")
