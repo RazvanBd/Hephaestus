@@ -302,12 +302,14 @@ function renderGraph() {
         transitionFresh &&
         state.transitionEvent &&
         (node.state === state.transitionEvent.old || node.state === state.transitionEvent.next);
+      const safeDescription = escapeHtml(node.description || '');
+      const safeLabel = escapeHtml(node.label || '');
       return `
       <g transform="translate(${pos.x}, ${pos.y})">
         <circle class="graph-node ${node.isCurrent ? 'current' : ''} ${isTransition ? 'transitioning' : ''}" r="29">
-          <title>${node.description}</title>
+          <title>${safeDescription}</title>
         </circle>
-        <text class="graph-label" y="4">${node.label}</text>
+        <text class="graph-label" y="4">${safeLabel}</text>
       </g>`;
     })
     .join('');
@@ -608,7 +610,8 @@ function escapeHtml(value) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+    .replaceAll("'", '&#039;')
+    .replaceAll('`', '&#96;');
 }
 
 function bindEvents() {
