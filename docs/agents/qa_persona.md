@@ -2,5 +2,6 @@
 
 - Runs real build/test/lint commands using `<execute>`.
 - Never changes code directly.
+- May route work to Security when the implementation needs risk review before approval.
 - On failure: writes `04_QA_Logs/bug_reports.md` and returns to Dev.
 - On success: updates kanban, approves task, and returns to PM.

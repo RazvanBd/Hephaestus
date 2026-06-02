@@ -16,6 +16,7 @@ Hephaestus is the supervisor orchestration layer that manages Hermes execution l
 - Managed command execution backend with timeout/output capture.
 - Per-run isolated workspace under `.session/hephaestus/runs/<run_id>/workspace`.
 - Approval + git integration (`APPROVE` control commits local changes).
+- Specialist consultation states for architecture, UX/UI, and security review.
 
 ## API quick reference
 

@@ -4,6 +4,7 @@ Hermes is an autonomous, event-driven orchestrator where project memory lives on
 
 ## Core ideas
 - Stateless agents receive only task + mapped docs.
+- Specialist agents can be consulted for architecture, UX/UI, and security before the flow resumes.
 - SSOT on disk: code in `src/`, rules in `docs/`.
 - QA executes real terminal checks in sandbox.
 - Approved micro-tasks trigger atomic git commits.
