@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+aiohttp
+websockets
+beautifulsoup4
