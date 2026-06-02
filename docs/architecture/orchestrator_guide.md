@@ -99,7 +99,7 @@ Hermes currently understands these handoff tags:
 
 | Tag | Effect |
 | --- | --- |
-| `<file path="..." action="create|update|upsert">` | Writes content into `src/` paths. |
+| `<file path="..." action="create|update|upsert">` | Writes content into an allowed repository path under `src/` or `docs/`. |
 | `<doc_update path="..." action="create|update|upsert">` | Writes content into `docs/` paths. |
 | `<execute>` | Emits a `CommandExecuted` event for the dashboard/audit flow. |
 | `<transition_to>` | Moves the state machine to another allowed state. |
@@ -208,7 +208,7 @@ This is useful for:
 
 On Windows:
 
-- run `/tmp/workspace/RazvanBd/Hephaestus/start_project.bat`
+- run `start_project.bat` from the repository root
 
 On other platforms:
 
