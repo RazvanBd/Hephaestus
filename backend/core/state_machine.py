@@ -41,6 +41,8 @@ class StateMachine:
     )
 
     def can_transition(self, to_state: HermesState) -> bool:
+        if to_state == HermesState.PAUSED:
+            return True
         return to_state in self.graph.get(self.current_state, set())
 
     def transition(self, to_state: HermesState) -> tuple[HermesState, HermesState]:

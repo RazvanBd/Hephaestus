@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 from backend.core.orchestrator import Orchestrator
@@ -5,8 +7,6 @@ from backend.core.state_machine import HermesState
 from backend.services.llm_gateway import LocalOllamaProvider
 from backend.services.session_logger import SessionLogger
 from backend.services.workspace_manager import WorkspaceManager
-
-app = FastAPI(title="Hermes Orchestrator")
 
 workspace_manager = WorkspaceManager(project_root=".")
 session_logger = SessionLogger(project_root=".")
@@ -18,10 +18,14 @@ orchestrator = Orchestrator(
 )
 
 
-@app.on_event("startup")
-async def startup() -> None:
+@asynccontextmanager
+async def lifespan(_: FastAPI):
     await workspace_manager.initialize_workspace()
     await session_logger.initialize_session()
+    yield
+
+
+app = FastAPI(title="Hermes Orchestrator", lifespan=lifespan)
 
 
 @app.websocket("/ws/dashboard")

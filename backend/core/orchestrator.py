@@ -26,22 +26,18 @@ class Orchestrator:
         self.event_bus = AsyncEventBus()
 
     async def pause(self) -> None:
-        old_state = self.state_machine.current_state
-        self.state_machine.current_state = HermesState.PAUSED
+        old_state, new_state = self.state_machine.transition(HermesState.PAUSED)
         await self.event_bus.publish(
             "StateTransition",
-            {"old_state": old_state.value, "new_state": HermesState.PAUSED.value},
+            {"old_state": old_state.value, "new_state": new_state.value},
         )
 
     async def resume(self) -> None:
         if self.state_machine.current_state == HermesState.PAUSED:
-            self.state_machine.current_state = HermesState.PM_BREAKDOWN
+            old_state, new_state = self.state_machine.transition(HermesState.PM_BREAKDOWN)
             await self.event_bus.publish(
                 "StateTransition",
-                {
-                    "old_state": HermesState.PAUSED.value,
-                    "new_state": HermesState.PM_BREAKDOWN.value,
-                },
+                {"old_state": old_state.value, "new_state": new_state.value},
             )
 
     async def process_agent_turn(self, prompt: str, *, max_retries: int = 3):

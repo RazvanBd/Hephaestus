@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from collections import defaultdict
 from typing import Awaitable, Callable, DefaultDict, Dict, List
 
 from fastapi import WebSocket
 
 EventHandler = Callable[[Dict], Awaitable[None]]
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncEventBus:
@@ -35,8 +38,14 @@ class AsyncEventBus:
             await handler(payload)
 
         async with self._lock:
+            stale_sockets: list[WebSocket] = []
             for socket in list(self._sockets):
                 try:
                     await socket.send_text(json.dumps(message))
-                except Exception:
+                except Exception as error:
+                    logger.warning("Failed websocket publish: %s", error)
+                    stale_sockets.append(socket)
+
+            for socket in stale_sockets:
+                if socket in self._sockets:
                     self._sockets.remove(socket)

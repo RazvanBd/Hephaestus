@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 class WorkspaceManager:
-    ALLOWED_PREFIXES = ("src", "docs")
+    ALLOWED_PREFIXES = {"src", "docs"}
 
     def __init__(self, project_root: str = ".") -> None:
         self.project_root = Path(project_root).resolve()
@@ -15,9 +15,12 @@ class WorkspaceManager:
         (self.project_root / ".session").mkdir(parents=True, exist_ok=True)
 
     def _safe_path(self, relative_path: str) -> Path:
-        candidate = (self.project_root / relative_path).resolve()
-        if not any(relative_path.startswith(prefix + "/") for prefix in self.ALLOWED_PREFIXES):
+        normalized = Path(relative_path)
+        root_prefix = normalized.parts[0] if normalized.parts else ""
+        if root_prefix not in self.ALLOWED_PREFIXES:
             raise ValueError("Only src/ and docs/ paths are writable")
+
+        candidate = (self.project_root / normalized).resolve()
         if self.project_root not in candidate.parents and candidate != self.project_root:
             raise ValueError("Path traversal is not allowed")
         return candidate
