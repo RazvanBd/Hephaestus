@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from backend.core.agent_graph import build_agent_graph
@@ -179,6 +180,8 @@ def create_app(
             "commit_hash": run.commit_hash,
             "approved": run.approved,
         }
+
+    app.mount("/", StaticFiles(directory="frontend/dashboard", html=True), name="dashboard")
 
     return app
 
