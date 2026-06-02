@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Awaitable, Callable, Protocol
 
 from backend.core.event_bus import AsyncEventBus
 from backend.core.state_machine import HermesState, StateMachine
@@ -15,11 +16,18 @@ RETRY_ERROR = (
 )
 
 
+class CommandExecutor(Protocol):
+    async def execute(self, command: str, *, working_dir: str): ...
+
+
 @dataclass
 class Orchestrator:
     llm_provider: LLMProvider
     workspace_manager: WorkspaceManager
     session_logger: SessionLogger
+    command_executor: CommandExecutor | None = None
+    execution_working_dir: str = "."
+    action_hook: Callable[[str, dict], Awaitable[None]] | None = None
 
     def __post_init__(self) -> None:
         self.state_machine = StateMachine()
@@ -79,6 +87,11 @@ class Orchestrator:
                     "FileModified",
                     {"path": file_path, "action": action.payload["action"]},
                 )
+                if self.action_hook:
+                    await self.action_hook(
+                        "FileModified",
+                        {"path": file_path, "action": action.payload["action"]},
+                    )
             elif action.action_type == "transition_to":
                 requested_state = HermesState(action.payload["state"])
                 old_state, new_state = self.state_machine.transition(requested_state)
@@ -86,7 +99,30 @@ class Orchestrator:
                     "StateTransition",
                     {"old_state": old_state.value, "new_state": new_state.value},
                 )
+                if self.action_hook:
+                    await self.action_hook(
+                        "StateTransition",
+                        {"old_state": old_state.value, "new_state": new_state.value},
+                    )
             elif action.action_type == "execute":
-                await self.event_bus.publish(
-                    "CommandExecuted", {"command": action.payload["command"]}
-                )
+                payload = {"command": action.payload["command"]}
+                if self.command_executor is not None:
+                    result = await self.command_executor.execute(
+                        action.payload["command"], working_dir=self.execution_working_dir
+                    )
+                    payload.update(
+                        {
+                            "return_code": result.return_code,
+                            "stdout": result.stdout,
+                            "stderr": result.stderr,
+                            "timed_out": result.timed_out,
+                            "success": result.success,
+                        }
+                    )
+                await self.event_bus.publish("CommandExecuted", payload)
+                if self.action_hook:
+                    await self.action_hook("CommandExecuted", payload)
+                if self.command_executor is not None and not payload.get("success", False):
+                    raise RuntimeError(
+                        f"Command execution failed: {action.payload['command']}"
+                    )
