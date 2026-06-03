@@ -153,19 +153,33 @@ function addFeedEvent(eventType, payload) {
 }
 
 function renderFeed() {
+  const previousScrollTop = els.eventFeed.scrollTop;
   els.eventFeed.innerHTML = '';
   for (const event of state.feed) {
     const node = document.createElement('div');
     node.className = `event-item event-${(event.eventType || 'Unknown').replace(/[^a-zA-Z0-9_-]/g, '')}`;
-    node.innerHTML = `
-      <div><strong>${event.eventType}</strong></div>
-      <div class="meta">${formatDate(event.ts)}</div>
-      <div>${event.summary || ''}</div>
-    `;
+
+    const title = document.createElement('div');
+    const strong = document.createElement('strong');
+    strong.textContent = String(event.eventType || 'Unknown');
+    title.appendChild(strong);
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = formatDate(event.ts);
+
+    const summary = document.createElement('div');
+    summary.textContent = event.summary || '';
+
+    node.appendChild(title);
+    node.appendChild(meta);
+    node.appendChild(summary);
     els.eventFeed.appendChild(node);
   }
   if (state.autoScroll) {
     els.eventFeed.scrollTop = els.eventFeed.scrollHeight;
+  } else {
+    els.eventFeed.scrollTop = previousScrollTop;
   }
 }
 
@@ -577,6 +591,7 @@ function renderArtifactsSection(artifacts) {
 }
 
 async function loadRunDetail(runId, showSpinner = true) {
+  const requestedRunId = runId;
   setLoading(els.resultLoading, showSpinner);
   setLoading(els.drawerEventsLoading, showSpinner);
   setLoading(els.drawerArtifactsLoading, showSpinner);
@@ -589,6 +604,7 @@ async function loadRunDetail(runId, showSpinner = true) {
       apiFetch(`/api/hephaestus/runs/${runId}/artifacts`),
     ]);
 
+    if (state.selectedRunId !== requestedRunId) return;
     state.selectedRun = runPayload.run;
     renderDrawerMeta();
     renderDrawerControls();
@@ -596,8 +612,10 @@ async function loadRunDetail(runId, showSpinner = true) {
     renderEventsSection(eventsPayload.events || []);
     renderArtifactsSection(artifactsPayload.artifacts || []);
   } catch (error) {
+    if (state.selectedRunId !== requestedRunId) return;
     showToast(`Run detail error: ${error.message}`);
   } finally {
+    if (state.selectedRunId !== requestedRunId) return;
     setLoading(els.resultLoading, false);
     setLoading(els.drawerEventsLoading, false);
     setLoading(els.drawerArtifactsLoading, false);

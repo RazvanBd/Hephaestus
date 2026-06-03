@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
@@ -181,7 +182,8 @@ def create_app(
             "approved": run.approved,
         }
 
-    app.mount("/", StaticFiles(directory="frontend/dashboard", html=True), name="dashboard")
+    dashboard_dir = Path(__file__).resolve().parent / "frontend" / "dashboard"
+    app.mount("/", StaticFiles(directory=str(dashboard_dir), html=True), name="dashboard")
 
     return app
 
