@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hephaestus Dashboard</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <header class="topbar">
+      <div>
+        <h1>Hephaestus Orchestration Dashboard</h1>
+        <p class="subtitle">Live visibility and controls for tasks, runs, and persona flow.</p>
+      </div>
+      <div id="wsStatus" class="ws-status disconnected" title="WebSocket status">
+        <span class="dot"></span>
+        <span class="label">Disconnected</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="main-column">
+        <section class="panel hero-panel">
+          <div class="panel-header">
+            <h2>Agent Network Map</h2>
+            <button id="refreshGraphBtn" class="btn ghost">Refresh</button>
+          </div>
+          <div id="graphLoading" class="loading hidden">Loading agent network...</div>
+          <div id="graphError" class="error hidden"></div>
+          <div id="graphContainer" class="graph-container"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Tasks</h2>
+            <div class="header-actions">
+              <button id="refreshTasksBtn" class="btn ghost">Refresh</button>
+              <button id="toggleTaskFormBtn" class="btn primary">New Task</button>
+            </div>
+          </div>
+
+          <form id="newTaskForm" class="inline-form hidden">
+            <label>
+              Title
+              <input id="taskTitleInput" type="text" required maxlength="200" />
+            </label>
+            <label>
+              Description
+              <textarea id="taskDescriptionInput" rows="3"></textarea>
+            </label>
+            <div class="form-actions">
+              <button type="submit" class="btn primary">Create Task</button>
+            </div>
+          </form>
+
+          <div id="tasksLoading" class="loading hidden">Loading tasks...</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Created At</th>
+                  <th># Runs</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tasksBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Runs</h2>
+            <button id="refreshRunsBtn" class="btn ghost">Refresh</button>
+          </div>
+          <div id="runsLoading" class="loading hidden">Loading runs...</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Run ID</th>
+                  <th>Task ID</th>
+                  <th>Status</th>
+                  <th>Current State</th>
+                  <th>Attempts</th>
+                  <th>Max Steps</th>
+                  <th>Updated At</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="runsBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <aside class="panel event-panel">
+        <div class="panel-header">
+          <h2>Live Event Feed</h2>
+          <label class="toggle">
+            <input id="scrollLockToggle" type="checkbox" checked />
+            Auto-scroll
+          </label>
+        </div>
+        <div id="eventFeed" class="event-feed"></div>
+      </aside>
+    </main>
+
+    <aside id="runDrawer" class="run-drawer" aria-hidden="true">
+      <div class="drawer-header">
+        <h2 id="drawerTitle">Run Details</h2>
+        <div class="header-actions">
+          <button id="refreshRunDetailBtn" class="btn ghost">Refresh</button>
+          <button id="closeDrawerBtn" class="btn ghost">Close</button>
+        </div>
+      </div>
+
+      <div id="runMeta" class="run-meta"></div>
+      <div id="drawerControls" class="drawer-controls"></div>
+
+      <section class="drawer-section">
+        <h3>Result</h3>
+        <div id="resultLoading" class="loading hidden">Loading result...</div>
+        <div id="runResult" class="json-box"></div>
+      </section>
+
+      <section class="drawer-section">
+        <h3>Events</h3>
+        <div id="drawerEventsLoading" class="loading hidden">Loading events...</div>
+        <div id="runEvents" class="list-box"></div>
+      </section>
+
+      <section class="drawer-section">
+        <h3>Artifacts</h3>
+        <div id="drawerArtifactsLoading" class="loading hidden">Loading artifacts...</div>
+        <div id="runArtifacts" class="list-box"></div>
+      </section>
+    </aside>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

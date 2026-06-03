@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from backend.core.agent_graph import build_agent_graph
@@ -179,6 +181,9 @@ def create_app(
             "commit_hash": run.commit_hash,
             "approved": run.approved,
         }
+
+    dashboard_dir = Path(__file__).resolve().parent / "frontend" / "dashboard"
+    app.mount("/", StaticFiles(directory=str(dashboard_dir), html=True), name="dashboard")
 
     return app
 
